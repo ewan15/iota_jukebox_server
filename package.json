@@ -3,8 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "install": "^0.12.2",
+    "jsdom": "^13.0.0",
+    "npm": "^6.4.1",
+    "qrcode-react": "^0.1.16",
+    "qrcode.react": "^0.8.0",
     "react": "^16.6.0",
+    "react-art-svg-renderer": "0.0.1-rc.8",
     "react-dom": "^16.6.0",
+    "react-native-qrcode-svg": "^5.1.1",
+    "react-native-svg": "^8.0.8",
+    "react-qr-code": "^0.1.2",
     "react-scripts": "2.1.1"
   },
   "scripts": {
