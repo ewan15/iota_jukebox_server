@@ -99,6 +99,18 @@ export function getLastTransaction(){
             .then(accountData => {
                 //const { addresses, inputs, transactions, balance } = accountData
                 console.log("SUCCESS")
+                let long = accountData.transfers.length
+                let lastT = accountData.transfers[long-1][0]
+                let tx =
+                    {
+                        'hash':lastT.hash,
+                        'value':lastT.value,
+                        'confirmed':lastT.persistence,
+                        'message' : lastT.signatureMessageFragment
+                    }
+                var message = tx.message.replace(/\d+$/, "")
+
+                console.log(Converter.trytesToAscii(message));
                 resolve(accountData)
             })
             .catch(err => {
