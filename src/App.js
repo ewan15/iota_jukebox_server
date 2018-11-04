@@ -1,32 +1,71 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React  from 'react';
 import './App.css';
-import {sendIOTA,ActivateOnReceieveTransaction,generateAddress} from './IOTA-API/main.js'
-import {setInterval, setTimeout} from "jsdom";
+import {generateAddress, getLastTransaction, getHash} from './IOTA-API/main.js'
+
+
 
 var QRCode = require('qrcode-react');
 
+var seed = "VVCNTEJLAXHSPHFICHRBFYYFN9WXJBVQSQWSAVQOFNVIPUYZHWSLFAKBGWBTYSJTEHWEUJBQXBEDSIQOC"
+
+var lastAddr = "NA"
+
 class App extends React.Component {
     state = {
-        address: "Finding Address...",
+        addressV: "Finding Address...",
     }
     constructor(props) {
         super(props);
     }
 
 
-    fetchAddr() {
-        generateAddress("VVCNTEJLAXHSPHFICHRBFYYFN9WXJBVQSQWSAVQOFNVIPUYZHWSLFAKBGWBTYSJTEHWEUJBQXBEDSIQOC")
-            .then(value => {
-              console.log(value)
-                this.setState({address : value});
+    fetchAddress() {
+        generateAddress(seed)
+            .then(valueSeed => {
+                console.log(valueSeed);
+
+                this.setState({addressV : valueSeed});
                 this.forceUpdate();
+
+                this.fetchAddress();
+
+            })
+            .catch((e) => console.log(e));
+
+    }
+
+    fetchTransactions() {
+        getLastTransaction()
+            .then(data => {
+                console.log("Found Data!")
+                console.log(data);
+
+                const { addresses, inputs, transactions, balance } = data
+
+                var transList =  transactions.filter(function(element) {
+                    return getHash().indexOf(element) === -1;
+                });
+
+                if (!(transList[transList.length-1] === lastAddr)){
+                    console.log("New ADDR found!")
+                    lastAddr = addresses;
+                }
+                else{
+                    console.log("No new transaction found")
+                }
+
+                this.fetchTransactions();
+
             })
             .catch((e) => console.log(e));
 
     }
     componentDidMount() {
-        this.fetchAddr();
+        this.fetchAddress();
+        this.fetchTransactions();
+    }
+    componentWillUnmount() {
+
     }
 
 
@@ -36,20 +75,25 @@ class App extends React.Component {
     return (
       <div className="App">
         <header className="App-header">
-          <div className="title">
           <h1>Jukebox</h1>
-              {this.state.address}
+              <div className="address">{this.state.addressV}</div>
               <p>
                   <QRCode
                       value={JSON.stringify({
-                          address: this.state.address,
-                          message: ''})}
-                      size={500}
+                          "address":
+                              this.state.addressV,
+                          "amount": 1,
+                          "tag": 'PIZZAPIZZA',
+                          "message": 'ID= ADDR='
+                      })}
+
+                      size={600}
                       color="black"
                       backgroundColor="transparent"
                   />
               </p>
-          </div>
+
+
         </header>
       </div>
     );

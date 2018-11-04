@@ -1,11 +1,10 @@
-import {iota, Converter, client} from './IOTAPackages.js';
-var async = require("async");
+import {iota, Converter} from './IOTAPackages.js';
 
 
-let addressType = {address: String, hasRead: Boolean}
 
-let addressList = [];
+let addressList = [{address: "OHQMCGYXDADZGPQPSQOPCLTKTWRQMIW9RSLADTYSXMAWWRPOJC9DJW9PTUFBERAQP9FCPTNRSX9NXXQJ9ILRQEYHFD", hasRead: false}];
 
+let hash = []
 
 
 export let sendIOTA = function (seed,addr,amount,msg) {
@@ -26,6 +25,7 @@ export let sendIOTA = function (seed,addr,amount,msg) {
         })
         .then(bundle => {
             console.log(`Published transaction with tail hash: ${bundle[0].hash}`)
+            hash.push(bundle[0].hash)
             console.log(`Bundle: ${bundle}`)
         })
         .catch(err => {
@@ -36,11 +36,13 @@ export let sendIOTA = function (seed,addr,amount,msg) {
 export function generateAddress(seed) {
 
     return new Promise((resolve, reject) => {
-        iota.getNewAddress(seed,{}, function(e, s) {
+        iota.getNewAddress(seed,{checksum: true}, function(e, s) {
             if (e) {
                 resolve(e)
             } else {
                 sendIOTA(seed,s,0,"GenerateAddr");
+
+                addressList.push({address: s, hasRead: false});
                 resolve(s)
 
             }
@@ -50,9 +52,9 @@ export function generateAddress(seed) {
 
 
 
-let onRecieveTransaction = function(func)
+/*let onRecieveTransaction = function(func)
 {
-    iota.findTransactions({ addresses: addressList.address })
+    iota.findTransactions({ address: addressList.address })
         .then(hashes => {
             if (!addressList.find(hashes).hasRead) {
                 addressList.find(hashes).hasRead = true;
@@ -66,12 +68,12 @@ let onRecieveTransaction = function(func)
 
 export let ActivateOnReceieveTransaction = function(func)
 {
-    setInterval(function() {
+    /!*setInterval(function() {
         onRecieveTransaction(func)
-    }, 5000);
-}
+    }, 5000);*!/
+}*/
 
-let getBalance = function(seed)
+/*let getBalance = function(seed)
 {
     iota.getAccountData(seed, {
         start: 0,
@@ -85,6 +87,29 @@ let getBalance = function(seed)
         .catch(err => {
             // ...
         })
+}*/
+
+export function getLastTransaction(){
+    return new Promise((resolve, reject) => {
+        console.log("Checking transactions...")
+        iota.getAccountData("VVCNTEJLAXHSPHFICHRBFYYFN9WXJBVQSQWSAVQOFNVIPUYZHWSLFAKBGWBTYSJTEHWEUJBQXBEDSIQOC", {
+            start: 0,
+            security: 2
+        })
+            .then(accountData => {
+                //const { addresses, inputs, transactions, balance } = accountData
+                console.log("SUCCESS")
+                resolve(accountData)
+            })
+            .catch(err => {
+                console.log("ERROR")
+                resolve(err)
+            })
+    })
+}
+
+export function getHash(){
+    return hash;
 }
 
 
